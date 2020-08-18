@@ -1,15 +1,20 @@
 <?php
+ session_start();
+ include 'inc/koneksi.php';
+
+	// mencegah error saat redirect dengan fungsi header(location)
+	ob_start();
 	// include sekali controllers/koneksi.php dan models/database.php
 	require_once('controllers/koneksi.php');
 	require_once('models/database.php');
 
 	$connection = new Database($host, $user, $pass, $database);
+	if(@$_SESSION['admin'] || @$_SESSION['mahasiswa']){
 ?>
 <!doctype html>
 <html lang="en">
-
 <head>
-	<title>Dashboard | HayuTravel</title>
+	<title>Welcome | OpenCollages</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
@@ -18,6 +23,7 @@
 	<link rel="stylesheet" href="assets/vendor/font-awesome/css/font-awesome.min.css">
 	<link rel="stylesheet" href="assets/vendor/linearicons/style.css">
 	<link rel="stylesheet" href="assets/vendor/chartist/css/chartist-custom.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 	<!-- MAIN CSS -->
 	<link rel="stylesheet" href="assets/css/main.css">
 	<!-- FOR DEMO PURPOSES ONLY. You should remove this in your project -->
@@ -27,15 +33,16 @@
 	<!-- ICONS -->
 	<link rel="apple-touch-icon" sizes="76x76" href="assets/img/apple-icon.png">
 	<link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon.png">
+	<!-- dataTables -->
+	<link rel="stylesheet" href="assets/dataTables/datatables.min.css">
 </head>
-
 <body>
 	<!-- WRAPPER -->
 	<div id="wrapper">
 		<!-- NAVBAR -->
 		<nav class="navbar navbar-default navbar-fixed-top">
 			<div class="brand">
-				<a href="?page=dashboard"><img src="assets/img/logo-dark.png" alt="Klorofil Logo" class="img-responsive logo"></a>
+				<a href="?page=dashboard"><h4 style="height: 0.8px; margin-top: -10px:">OpenCollages</h4></a>
 			</div>
 			<div class="container-fluid">
 				<div class="navbar-btn">
@@ -49,7 +56,7 @@
 				</form> -->
 				<div id="navbar-menu">
 					<ul class="nav navbar-nav navbar-right">
-						<li class="dropdown">
+						<!-- <li class="dropdown">
 							<a href="#" class="dropdown-toggle icon-menu" data-toggle="dropdown">
 								<i class="lnr lnr-alarm"></i>
 								<span class="badge bg-danger">5</span>
@@ -62,14 +69,27 @@
 								<li><a href="#" class="notification-item"><span class="dot bg-success"></span>Your request has been approved</a></li>
 								<li><a href="#" class="more">See all notifications</a></li>
 							</ul>
-						</li>
+						</li> -->
 						<li class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown"><img src="assets/img/user.png" class="img-circle" alt="Avatar"> <span>Admin</span> <i class="icon-submenu lnr lnr-chevron-down"></i></a>
+							<!-- menampilkan user pelogin sesuai jabatan_ptg -->
+							<?php
+								if(@$_SESSION['admin']) {
+									$user_terlogin = @$_SESSION['admin'];
+								} else if(@$_SESSION['mahasiswa']) {
+									$user_terlogin = @$_SESSION['mahasiswa'];
+								} 
+
+								// koneksi database
+								$koneksi = mysqli_connect('localhost','root','','10118058_akademik');
+								$sql_user = mysqli_query($koneksi, "SELECT * FROM user WHERE id_user = '$user_terlogin'") or die (mysqli_error());
+								$data_user = mysqli_fetch_array($sql_user);
+							?>
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown"><img src="assets/img/user.png" class="img-circle" alt="Avatar"> <span><?php echo $data_user['nama']; ?></span> <i class="icon-submenu lnr lnr-chevron-down"></i></a>
 							<ul class="dropdown-menu">
-								<li><a href="#"><i class="lnr lnr-user"></i> <span>My Profile</span></a></li>
+								<!-- <li><a href="#"><i class="lnr lnr-user"></i> <span>My Profile</span></a></li>
 								<li><a href="#"><i class="lnr lnr-envelope"></i> <span>Message</span></a></li>
-								<li><a href="#"><i class="lnr lnr-cog"></i> <span>Settings</span></a></li>
-								<li><a href="#"><i class="lnr lnr-exit"></i> <span>Logout</span></a></li>
+								<li><a href="#"><i class="lnr lnr-cog"></i> <span>Settings</span></a></li> -->
+								<li><a href="inc/logout.php"><i class="lnr lnr-exit"></i> <span>Logout</span></a></li>
 							</ul>
 						</li>
 					</ul>
@@ -78,43 +98,59 @@
 		</nav>
 		<!-- END NAVBAR -->
 		<!-- LEFT SIDEBAR -->
-		<div id="sidebar-nav" class="sidebar">
+		<div id="sidebar-nav" class="sidebar" style="magin-top:40px;">
 			<div class="sidebar-scroll">
 				<nav>
 					<ul class="nav">
-						<li><a href="?page=dashboard" class="active"><i class="lnr lnr-home"></i> <span>Dashboard</span></a></li>
-						<li><a href="?page=pelanggan" class=""><i class="lnr lnr-users"></i> <span>Pelanggan</span></a></li>
-						<li><a href="?page=kendaraan" class=""><i class="lnr lnr-car"></i> <span>Kendaraan</span></a></li>
-						<li><a href="?page=transaksi" class=""><i class="lnr lnr-map"></i> <span>Transaksi</span></a></li>
-						<li>
-							<a href="#subPages" data-toggle="collapse" class="collapsed"><i class="lnr lnr-file-empty"></i> <span>Laporan</span> <i class="icon-submenu lnr lnr-chevron-left"></i></a>
-							<div id="subPages" class="collapse ">
-								<ul class="nav">
-									<li><a href="page-profile.html" class="">Profile</a></li>
-									<li><a href="page-login.html" class="">Login</a></li>
-									<li><a href="page-lockscreen.html" class="">Lockscreen</a></li>
-								</ul>
-							</div>
-						</li>
+            <?php
+            if(@$_SESSION['admin'] || @$_SESSION['mahasiswa']){ ?>
+						<li><a href="?page=dashboard" class=""><i class="lnr lnr-home"></i> <span>Dashboard</span></a></li>
+             <?php
+              }?>
+              <?php
+              if(@$_SESSION['admin']){ ?>
+						  <li><a href="?page=pengguna" class=""><i class="lnr lnr-users"></i></i> <span>Pengguna</span></a></li>
+            <?php
+             }?>
+             <?php
+             if(@$_SESSION['admin'] ){ ?>
+						<li><a href="?page=dosen" class=""><i class="lnr lnr-user"></i> <span>Dosen</span></a></li>
+            <?php
+             }?>
+             <?php
+             if(@$_SESSION['admin'] ){ ?>
+						<li><a href="?page=mahasiswa" class=""><i class="lnr lnr-user"></i> <span>Mahasiswa</span></a></li>
+            <?php
+             }?>
+        
+             <?php
+             if(@$_SESSION['admin']){ ?>
+           <li><a href="?page=matkul" class=""><i class="lnr lnr-book"></i> <span>MataKuliah</span></a></li>
+            <?php
+             }?>
+     
+			         
 					</ul>
 				</nav>
 			</div>
 		</div>
 		<!-- END LEFT SIDEBAR -->
 
-		<!-- ISI WEBSITE DINAMIS -->
+		<!-- isi web dinamis -->
 		<?php
 			if(@$_GET['page'] == 'dashboard' || @$_GET['page'] == '') {
 				include "views/dashboard.php";
-			} else if(@$_GET['page'] == 'pelanggan') {
-				include "views/pelanggan.php";
-			}  else if(@$_GET['page'] == 'kendaraan') {
-				include "views/kendaraan.php";
-			}  else if(@$_GET['page'] == 'transaksi') {
-				include "views/transaksi.php";
-			}
+			} else if(@$_GET['page'] == 'pengguna') {
+				include "views/pengguna.php";
+			}  else if(@$_GET['page'] == 'mahasiswa') {
+				include "views/mahasiswa.php";
+			}  else if(@$_GET['page'] == 'dosen') {
+				include "views/dosen.php";
+			}   else if(@$_GET['page'] == 'matkul') {
+				include "views/matkul.php";
+			}  
 		?>
-		<!-- END ISI WEBSITE DINAMIS -->
+		<!-- isi web dinamis -->
 
 		<div class="clearfix"></div>
 		<footer>
@@ -131,7 +167,18 @@
 	<script src="assets/vendor/jquery-slimscroll/jquery.slimscroll.min.js"></script>
 	<script src="assets/vendor/jquery.easy-pie-chart/jquery.easypiechart.min.js"></script>
 	<script src="assets/vendor/chartist/js/chartist.min.js"></script>
-	<script src="assets/scripts/klorofil-common.js"></script>	
+	<script src="assets/scripts/klorofil-common.js"></script>
+	<!-- dataTables -->
+	<script src="assets/dataTables/datatables.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$('#datatables').DataTable();
+		});
+	</script>
 </body>
-
 </html>
+<?php
+}else {
+  header("location: login.php");
+}
+?>

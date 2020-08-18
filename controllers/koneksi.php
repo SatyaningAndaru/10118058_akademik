@@ -2,5 +2,5 @@
 	$host = "localhost";
 	$user = "root";
 	$pass = "";
-	$database = "db_hayutravel";
+	$database = "10118058_akademik";
 ?>
